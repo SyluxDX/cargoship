@@ -1,0 +1,2 @@
+*.yaml
+!extractor_config.yaml

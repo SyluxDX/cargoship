@@ -1,0 +1,32 @@
+log2console: true
+timesFilePath: "ftptimes.yaml"
+
+# Golang date formation
+#    year: 2006
+#   month: 01
+#     day: 02
+#   hours: 15
+# minutes: 04
+# seconds: 05
+logging:
+  folder: "script_log"
+  filename: "extractor_log_{200601021504}.log"
+
+ftps:
+- name: "test"
+  hostname: "127.0.0.1"
+  port: 20
+  username: "ftpuser"
+  password: "passwd"
+  protocol: "ftp"
+
+services:
+- name: "service name"
+  ftpConfig: [test]
+  sourceFolder: "asd"
+  destinationFolder: "asd"
+  filePrefix: "file-"
+  fileExtension: "txt"
+  historyFolder: ""
+  maxTime: 123
+  windowLimit: 1

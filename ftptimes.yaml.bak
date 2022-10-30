@@ -1,0 +1,9 @@
+- ftp: ftp
+  service: minuteprocess
+  time: 2022-10-10T10:00:01
+- ftp: ftp
+  service: hourlyprocess
+  time: 2022-10-10T09:10:00
+- ftp: ftp
+  service: daylyprocess
+  time: 2022-10-10T09:10:00
