@@ -42,11 +42,10 @@ scripts to extract and sends files to ftps and sftp servers
 ## Time Windows
 
 ### ToDo
-- Scripts should start the download window on file timestamp after filtering
 - Create Makefile to build scripts to windows and linux
 - Makefile to clean ftdata and run server?
 - Test golang connections to SFTP server
-- Create Extractor script
+- Create Extractor script (ftp done, code sftp)
 - Create Sender Script
 - Ponder if extractor and send should be one or two scripts
 - See how to use goroutines to speed up downloads

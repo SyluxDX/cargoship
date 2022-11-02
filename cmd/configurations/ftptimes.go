@@ -52,13 +52,14 @@ func ReadTimes(filepath string) ([]FileTimes, error) {
 	return config, nil
 }
 
-// func GetTimes(ftpTimes []FileTimes, server string, service string) {
-// 	for _, time := range ftpTimes {
-// 		if time.Ftp == server && time.Service {
-
-// 		}
-// 	}
-// }
+func GetTimes(ftpTimes []FileTimes, server string, service string) time.Time {
+	for _, elm := range ftpTimes {
+		if elm.Ftp == server && elm.Service == service {
+			return elm.Time
+		}
+	}
+	return time.Date(1, 1, 1, 0, 0, 0, 0, time.UTC)
+}
 
 func UpsertTimes(config *[]FileTimes, ftp string, service string, times time.Time) {
 	for idx, filetimes := range *config {

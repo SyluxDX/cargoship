@@ -72,7 +72,7 @@ function write_files() {
 
 	for i in $(seq $start $increment $end)
 	do
-		stamp=$(date -d "${i} ${step}" '+%Y%m%d%H%M')
+		stamp=$(date -ud "${i} ${step}" '+%Y%m%d%H%M')
 		echo "Writen ${prefix}${stamp}.${extension}"
 		# write file with data
 		head -c 10K /dev/urandom > "${prefix}${stamp}.${extension}"
