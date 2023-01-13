@@ -122,7 +122,7 @@ func extractFiles(config configurations.ExtractorConfig, times *[]configurations
 			entries = dateFilterDirectory(entries, fileTime)
 			// check if there are any files to download
 			if len(entries) == 0 {
-				return
+				continue
 			}
 			// donwload files
 			lastTime, err := downloadFiles(conn, service.Src, service.Dst, entries)
