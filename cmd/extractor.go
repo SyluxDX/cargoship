@@ -12,7 +12,6 @@ import (
 	"cargoship/cmd/configurations"
 
 	"github.com/jlaffaye/ftp"
-	"gopkg.in/yaml.v3"
 )
 
 func checkFolder(folderPath string) {
@@ -31,7 +30,6 @@ func listDirectory(conn *ftp.ServerConn, source string, prefix string, extension
 	}
 	for _, entry := range entries {
 		if strings.HasPrefix(entry.Name, prefix) && strings.HasSuffix(entry.Name, extension) {
-			// entry.Name = fmt.Sprintf("%s/%s", source, entry.Name)
 			outputList = append(outputList, entry)
 		}
 	}
@@ -59,8 +57,6 @@ func fileDownload(conn *ftp.ServerConn, destination string, entry *ftp.Entry) er
 	// create local writer
 	localWriter, err := os.OpenFile(
 		destination,
-		// fmt.Sprintf("%s/%s", destination, entry.Name),
-		// os.O_RDWR|os.O_CREATE|os.O_TRUNC,
 		os.O_WRONLY|os.O_CREATE|os.O_TRUNC,
 		0644,
 	)
@@ -97,9 +93,9 @@ func downloadFiles(conn *ftp.ServerConn, source string, destination string, entr
 	return lastFileTime, nil
 }
 
-func extractFiles(config configurations.ExtractorConfig, times []configurations.FileTimes) {
+func extractFiles(config configurations.ExtractorConfig, times *[]configurations.FileTimes) {
 	for _, server := range config.Ftps {
-		fmt.Println(server.Name)
+		log.Printf("Connect to server: %s\n", server.Name)
 		// create connection to ftp
 		ftpUrl := fmt.Sprintf("%s:%d", server.Hostname, server.Port)
 		conn, err := ftp.Dial(ftpUrl, ftp.DialWithTimeout(5*time.Second))
@@ -113,37 +109,28 @@ func extractFiles(config configurations.ExtractorConfig, times []configurations.
 		}
 		// service loop
 		for _, service := range server.Services {
-			fmt.Println("", service.Name)
+			log.Printf("Processing: %s\n", service.Name)
 			// check folder
 			checkFolder(service.Dst)
 			// get last file time
-			fileTime := configurations.GetTimes(times, server.Name, service.Name)
-			fmt.Println(fileTime)
+			fileTime := configurations.GetTimes(*times, server.Name, service.Name)
 			// list files in directory
 			entries, err := listDirectory(conn, service.Src, service.Prefix, service.Extension)
 			if err != nil {
 				log.Panic(err)
 			}
 			entries = dateFilterDirectory(entries, fileTime)
-			for _, entry := range entries {
-				fmt.Println(entry.Name)
-			}
 			// check if there are any files to download
 			if len(entries) == 0 {
 				return
 			}
-
-			dir, _ := conn.CurrentDir()
-			fmt.Println(dir)
 			// donwload files
 			lastTime, err := downloadFiles(conn, service.Src, service.Dst, entries)
 			if err != nil {
 				log.Panic(err)
 			}
 			// update last downloaded time
-			configurations.UpsertTimes(&times, server.Name, service.Name, lastTime)
-			// fileTime := configurations.GetTimes(times, server.Name, service.Name)
-			// fmt.Println(fileTime)
+			configurations.UpsertTimes(times, server.Name, service.Name, lastTime)
 		}
 	}
 }
@@ -167,21 +154,5 @@ func main() {
 	// defer update/write ftp time state file
 	defer configurations.WriteTimes(&times, configs.TimesPath)
 
-	// configurations.UpsertTimes(&times, "newftp", "bananas", time.Now().UTC().Format("2006-01-02T15:04:05"))
-	aux, _ := yaml.Marshal(times)
-	log.Println(string(aux))
-
-	// configurations.UpsertTimes(&times, "azure", "bannas", time.Now().UTC())
-
-	// aux, _ = yaml.Marshal(times)
-	// log.Println(string(aux))
-	// configurations.UpsertTimes(&times, "ftp", "hourlyprocess", time.Now().UTC())
-
-	// aux, _ = yaml.Marshal(times)
-	// log.Println(string(aux))
-
-	// test_ftp(*configs)
-	extractFiles(*configs, times)
-	aux, _ = yaml.Marshal(times)
-	log.Println(string(aux))
+	extractFiles(*configs, &times)
 }
