@@ -36,12 +36,25 @@ func listDirectory(conn *ftp.ServerConn, source string, prefix string, extension
 	return outputList, nil
 }
 
-func dateFilterDirectory(entries []*ftp.Entry, lastTime time.Time) []*ftp.Entry {
+func dateFilterDirectory(entries []*ftp.Entry, lastTime time.Time, maxTime int, limit int) []*ftp.Entry {
 	var outputList []*ftp.Entry
 
+	filesLimit := time.Now().UTC().Add(time.Minute * time.Duration(limit*-1))
+
 	for _, entry := range entries {
-		if entry.Time.After(lastTime) {
+		if entry.Time.After(lastTime) && entry.Time.Before(filesLimit) {
+			if len(outputList) == 0 {
+				// update file limit with max time
+				maxLimit := entry.Time.Add(time.Minute * time.Duration(maxTime))
+				if maxLimit.Before(filesLimit) {
+					filesLimit = maxLimit
+				}
+			}
 			outputList = append(outputList, entry)
+		}
+		// cut for loop if files (entry) are after the file limit time
+		if entry.Time.After(filesLimit) {
+			break
 		}
 	}
 	return outputList
@@ -119,7 +132,7 @@ func extractFiles(config configurations.ExtractorConfig, times *[]configurations
 			if err != nil {
 				log.Panic(err)
 			}
-			entries = dateFilterDirectory(entries, fileTime)
+			entries = dateFilterDirectory(entries, fileTime, service.MaxTime, service.Window)
 			// check if there are any files to download
 			if len(entries) == 0 {
 				continue
