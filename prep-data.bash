@@ -102,16 +102,16 @@ function execute_actions() {
 	for act in ${MODE[@]}; do
 		if [ $act = "1minute" ]; then
 			mkdir -p ftpdata/files_1min
-			write_files $start $end minutes "ftpdata/files_1min/asd_" log
+			write_files $start $end minutes "ftpdata/files_1min/min1_" log
 		elif [ $act = "5minute" ]; then
 			mkdir -p ftpdata/files_5min
-			write_files $(( $start*5 )) $(( $end*5 )) minutes "ftpdata/files_5min/asd_" log 5
+			write_files $(( $start*5 )) $(( $end*5 )) minutes "ftpdata/files_5min/min5_" log 5
 		elif [ $act = "hourly" ]; then
 			mkdir -p ftpdata/files_hour
-			write_files $start $end hours "ftpdata/files_hour/asd_" log
+			write_files $start $end hours "ftpdata/files_hour/hourly_" log
 		elif [ $act = "daily" ]; then
 			mkdir -p ftpdata/files_day
-			write_files $start $end days "ftpdata/files_day/asd_" log
+			write_files $start $end days "ftpdata/files_day/daily_" log
 		else
 			ERROR="${RED}ERROR${NC}: Unknow mode"
 		fi
