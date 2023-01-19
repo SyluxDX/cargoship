@@ -24,8 +24,8 @@ scripts to extract and sends files to ftps and sftp servers
 |         filePrefix        | string        | File prefix to filter source files                                                                                    |
 |         fileExtension     | string        | File extention to filter source files                                                                                 |
 |         historyFolder     | string        | Folder to move/archive process files                                                                                  |
-|         maxTime           | int           | Max time windows of files to process, see [Time Windows](#time-windows) for more information                          |
-|         windowLimit       | int           | Limit in relation to NOW where newer files won't be process, see [Time Windows](#time-windows) for more information   |
+|         maxTime           | int           | Max time (minutes) windows of files to process, see [Time Windows](#time-windows) for more information                          |
+|         windowLimit       | int           | Limit (minutes) in relation to NOW where newer files won't be process, see [Time Windows](#time-windows) for more information   |
 
 ## Dynamic Timestamp
 
@@ -41,7 +41,24 @@ scripts to extract and sends files to ftps and sftp servers
 
 ## Time Windows
 
+### maxTime
+
+_template_
+
+Time limit calculating by using the first valid file to download and add minutes equal to maxTime value
+
+_add more info_
+
+### windowLimit
+
+_template_
+
+Time limit calculated by substratcing minutes equal to windowLimit value to current date
+
+_add more info_
+
 ### ToDo
+- Update README with futher description of Time Windows
 - Create Makefile to build scripts to windows and linux
 - Makefile to clean ftdata and run server?
 - Test golang connections to SFTP server
