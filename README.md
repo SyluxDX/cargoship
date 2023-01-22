@@ -57,12 +57,25 @@ Time limit calculated by substratcing minutes equal to windowLimit value to curr
 
 _add more info_
 
+### Planning
+- Shipper:
+    - Change configurations to have function mode: extractor, sender
+    - Change configuration to have multiple logs files by mode?
+    - 
+    - Write sender, ftp and sftp
+- Loader:
+    - Compressor
+    - Cleaner
+- Packager/Processor:
+    - Should be in here?
+    - Use external awk?
+    - Does golang have internal awk?
+
 ### ToDo
 - Update README with futher description of Time Windows
 - Create Makefile to build scripts to windows and linux
 - Makefile to clean ftdata and run server?
 - Test golang connections to SFTP server
-- Create Extractor script (ftp done, code sftp)
+    - Create sftp Extractor script
 - Create Sender Script
-- Ponder if extractor and send should be one or two scripts
 - See how to use goroutines to speed up downloads
