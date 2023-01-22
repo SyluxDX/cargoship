@@ -1,7 +1,6 @@
 package main
 
 import (
-	"flag"
 	"fmt"
 	"io"
 	"log"
@@ -132,6 +131,17 @@ func extractFiles(config configurations.ExtractorConfig, times *[]configurations
 			if err != nil {
 				log.Panic(err)
 			}
+			fmt.Println("make a dir")
+			err = conn.MakeDir("createdFolder")
+			if err != nil {
+				fmt.Println(err)
+			}
+			entry, err := conn.GetEntry("createdFolder")
+			if err != nil {
+				fmt.Println(err)
+			} else {
+				fmt.Println(entry)
+			}
 			entries = dateFilterDirectory(entries, fileTime, service.MaxTime, service.Window)
 			// check if there are any files to download
 			if len(entries) == 0 {
@@ -144,28 +154,22 @@ func extractFiles(config configurations.ExtractorConfig, times *[]configurations
 			}
 			// update last downloaded time
 			configurations.UpsertTimes(times, server.Name, service.Name, lastTime)
+
+			// test remote move
+			conn.ChangeDir(fmt.Sprintf("/%s/afolder", service.Src))
+			dir, _ := conn.CurrentDir()
+			fmt.Println(dir)
+
+			entries, _ = conn.List("")
+			for _, entry := range entries {
+				fmt.Println(" ", entry.Name)
+			}
+
+			err = conn.Rename("hello.txt", "/historyFolder/hello.txt")
+			if err != nil {
+				fmt.Println(err)
+				fmt.Printf("%T\n", err)
+			}
 		}
 	}
-}
-
-func main() {
-	// command line flags
-	var configFilepath string
-	flag.StringVar(&configFilepath, "config", "extractor_config.yaml", "Path to configuration yaml")
-	flag.Parse()
-
-	// read script configuration
-	configs, err := configurations.ReadConfig(configFilepath)
-	if err != nil {
-		log.Panic(err)
-	}
-	// read ftp times state
-	times, err := configurations.ReadTimes(configs.TimesPath)
-	if err != nil {
-		log.Panic(err)
-	}
-	// defer update/write ftp time state file
-	defer configurations.WriteTimes(&times, configs.TimesPath)
-
-	extractFiles(*configs, &times)
 }
