@@ -121,7 +121,7 @@ func extractFiles(config configurations.ExtractorConfig, times *[]configurations
 		}
 		// service loop
 		for _, service := range server.Services {
-			log.Printf("Processing: %s\n", service.Name)
+			log.Printf("Processing %s: %s\n", service.Mode, service.Name)
 			// check folder
 			checkFolder(service.Dst)
 			// get last file time
@@ -131,17 +131,7 @@ func extractFiles(config configurations.ExtractorConfig, times *[]configurations
 			if err != nil {
 				log.Panic(err)
 			}
-			fmt.Println("make a dir")
-			err = conn.MakeDir("createdFolder")
-			if err != nil {
-				fmt.Println(err)
-			}
-			entry, err := conn.GetEntry("createdFolder")
-			if err != nil {
-				fmt.Println(err)
-			} else {
-				fmt.Println(entry)
-			}
+
 			entries = dateFilterDirectory(entries, fileTime, service.MaxTime, service.Window)
 			// check if there are any files to download
 			if len(entries) == 0 {
@@ -153,23 +143,7 @@ func extractFiles(config configurations.ExtractorConfig, times *[]configurations
 				log.Panic(err)
 			}
 			// update last downloaded time
-			configurations.UpsertTimes(times, server.Name, service.Name, lastTime)
-
-			// test remote move
-			conn.ChangeDir(fmt.Sprintf("/%s/afolder", service.Src))
-			dir, _ := conn.CurrentDir()
-			fmt.Println(dir)
-
-			entries, _ = conn.List("")
-			for _, entry := range entries {
-				fmt.Println(" ", entry.Name)
-			}
-
-			err = conn.Rename("hello.txt", "/historyFolder/hello.txt")
-			if err != nil {
-				fmt.Println(err)
-				fmt.Printf("%T\n", err)
-			}
+			configurations.UpsertTimes(times, server.Name, service.Mode, service.Name, lastTime)
 		}
 	}
 }

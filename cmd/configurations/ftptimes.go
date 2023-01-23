@@ -9,19 +9,20 @@ import (
 
 type configTimes struct {
 	Ftp     string `yaml:"ftp"`
+	Mode    string `yaml:"mode"`
 	Service string `yaml:"service"`
 	Time    string `yaml:"time"`
 }
 
 type FileTimes struct {
 	Ftp     string
+	Mode    string
 	Service string
 	Time    time.Time
 }
 
 func ReadTimes(filepath string) ([]FileTimes, error) {
 	// create empty readConfig
-	//var readConfig FileTimes
 	var readConfig []configTimes
 
 	// check if file exits
@@ -61,15 +62,15 @@ func GetTimes(ftpTimes []FileTimes, server string, service string) time.Time {
 	return time.Date(1, 1, 1, 0, 0, 0, 0, time.UTC)
 }
 
-func UpsertTimes(config *[]FileTimes, ftp string, service string, times time.Time) {
+func UpsertTimes(config *[]FileTimes, ftp string, mode string, service string, times time.Time) {
 	for idx, filetimes := range *config {
-		if filetimes.Ftp == ftp && filetimes.Service == service {
+		if filetimes.Ftp == ftp && filetimes.Mode == mode && filetimes.Service == service {
 			(*config)[idx].Time = times
 			return
 		}
 	}
 	// new ftp times
-	*config = append(*config, FileTimes{Ftp: ftp, Service: service, Time: times})
+	*config = append(*config, FileTimes{Ftp: ftp, Mode: mode, Service: service, Time: times})
 }
 
 func WriteTimes(ftpTimes *[]FileTimes, filepath string) error {
@@ -77,6 +78,7 @@ func WriteTimes(ftpTimes *[]FileTimes, filepath string) error {
 	for idx, stamp := range *ftpTimes {
 		fileData[idx] = configTimes{
 			Ftp:     stamp.Ftp,
+			Mode:    stamp.Mode,
 			Service: stamp.Service,
 			Time:    stamp.Time.Format(time.RFC3339),
 		}
