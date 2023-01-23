@@ -27,6 +27,7 @@ type fileConfig struct {
 	Services []struct {
 		Name      string   `yaml:"name"`
 		Ftp       []string `yaml:"ftpConfig"`
+		Mode      string   `yaml:"mode"`
 		Src       string   `yaml:"sourceFolder"`
 		Dst       string   `yaml:"destinationFolder"`
 		Prefix    string   `yaml:"filePrefix"`
@@ -44,6 +45,7 @@ type LogConfig struct {
 
 type ServiceConfig struct {
 	Name      string
+	Mode      string
 	Src       string
 	Dst       string
 	Prefix    string
@@ -96,6 +98,7 @@ func processConfig(config fileConfig) *ExtractorConfig {
 	for _, service := range config.Services {
 		match := ServiceConfig{
 			Name:      service.Name,
+			Mode:      service.Mode,
 			Src:       service.Src,
 			Dst:       service.Dst,
 			Prefix:    service.Prefix,
