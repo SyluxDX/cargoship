@@ -2,9 +2,13 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"log"
+	"time"
 
 	"cargoship/cmd/configurations"
+
+	"github.com/jlaffaye/ftp"
 )
 
 func main() {
@@ -23,8 +27,28 @@ func main() {
 	if err != nil {
 		log.Panic(err)
 	}
+
 	// defer update/write ftp time state file
 	defer configurations.WriteTimes(&times, configs.TimesPath)
 
-	extractFiles(*configs, &times)
+	for _, server := range configs.Ftps {
+		log.Printf("Connect to server: %s\n", server.Name)
+		// create connection to ftp
+		ftpUrl := fmt.Sprintf("%s:%d", server.Hostname, server.Port)
+		conn, err := ftp.Dial(ftpUrl, ftp.DialWithTimeout(5*time.Second))
+		if err != nil {
+			log.Fatal(err)
+		}
+		// login
+		err = conn.Login(server.User, server.Pass)
+		if err != nil {
+			log.Fatal(err)
+		}
+		// service loop
+		for _, service := range server.Services {
+			if service.Mode == "import" {
+				extractFiles(server.Name, conn, service, &times)
+			}
+		}
+	}
 }
