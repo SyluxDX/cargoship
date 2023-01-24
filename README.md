@@ -72,13 +72,12 @@ _add more info_
     - Does golang have internal awk?
 
 ### ToDo
+- Create Sender Script
+- Test golang connections to SFTP server
+    - Create sftp Extractor script
 - Add logging to file:
     - create files if config exists
     - configure loggers: import, export, console
+- See how to use goroutines to speed up downloads
 - Update README with futher description of Time Windows
 - Create Makefile to build scripts to windows and linux
-- Makefile to clean ftdata and run server?
-- Test golang connections to SFTP server
-    - Create sftp Extractor script
-- Create Sender Script
-- See how to use goroutines to speed up downloads
