@@ -59,9 +59,6 @@ _add more info_
 
 ### Planning
 - Shipper:
-    - Change configurations to have function mode: extractor, sender
-    - Change configuration to have multiple logs files by mode?
-    - 
     - Write sender, ftp and sftp
 - Loader:
     - Compressor
