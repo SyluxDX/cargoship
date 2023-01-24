@@ -36,7 +36,6 @@ func ReadTimes(filepath string) ([]FileTimes, error) {
 		if err != nil {
 			return nil, err
 		}
-
 	}
 
 	// convert string into time object
@@ -45,6 +44,7 @@ func ReadTimes(filepath string) ([]FileTimes, error) {
 		timestamp, _ := time.Parse(time.RFC3339, serviceService.Time)
 		config = append(config, FileTimes{
 			Ftp:     serviceService.Ftp,
+			Mode:    serviceService.Mode,
 			Service: serviceService.Service,
 			Time:    timestamp,
 		})
@@ -53,9 +53,9 @@ func ReadTimes(filepath string) ([]FileTimes, error) {
 	return config, nil
 }
 
-func GetTimes(ftpTimes []FileTimes, server string, service string) time.Time {
+func GetTimes(ftpTimes []FileTimes, server string, mode string, service string) time.Time {
 	for _, elm := range ftpTimes {
-		if elm.Ftp == server && elm.Service == service {
+		if elm.Ftp == server && elm.Service == service && elm.Mode == mode {
 			return elm.Time
 		}
 	}
