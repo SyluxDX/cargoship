@@ -72,6 +72,9 @@ _add more info_
     - Does golang have internal awk?
 
 ### ToDo
+- Add logging to file:
+    - create files if config exists
+    - configure loggers: import, export, console
 - Update README with futher description of Time Windows
 - Create Makefile to build scripts to windows and linux
 - Makefile to clean ftdata and run server?
