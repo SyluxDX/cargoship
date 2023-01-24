@@ -13,8 +13,14 @@ type fileConfig struct {
 	Log2Console bool   `yaml:"log2console"`
 	TimesPath   string `yaml:"timesFilePath"`
 	Log         struct {
-		Folder   string `yaml:"folder"`
-		Filename string `yaml:"filename"`
+		Import struct {
+			Folder   string `yaml:"folder"`
+			Filename string `yaml:"filename"`
+		} `yaml:"import"`
+		Export struct {
+			Folder   string `yaml:"folder"`
+			Filename string `yaml:"filename"`
+		} `yaml:"export"`
 	} `yaml:"logging"`
 	Ftps []struct {
 		Name     string `yaml:"name"`
@@ -38,9 +44,13 @@ type fileConfig struct {
 	} `yaml:"services"`
 }
 
-type LogConfig struct {
+type ModeLogConfig struct {
 	Folder   string
 	Filename string
+}
+type LogConfig struct {
+	Import ModeLogConfig
+	Export ModeLogConfig
 }
 
 type ServiceConfig struct {
@@ -75,8 +85,14 @@ func processConfig(config fileConfig) *ExtractorConfig {
 		Log2Console: config.Log2Console,
 		TimesPath:   config.TimesPath,
 		Log: LogConfig{
-			Folder:   config.Log.Folder,
-			Filename: config.Log.Filename,
+			Import: ModeLogConfig{
+				Folder:   config.Log.Import.Folder,
+				Filename: config.Log.Import.Filename,
+			},
+			Export: ModeLogConfig{
+				Folder:   config.Log.Export.Folder,
+				Filename: config.Log.Export.Filename,
+			},
 		},
 	}
 
@@ -130,15 +146,28 @@ func ReadConfig(filepath string) (*ExtractorConfig, error) {
 		return nil, err
 	}
 	// replace logfile name data placeholder
-	startIndex := strings.Index(config.Log.Filename, "{")
-	endIndex := strings.Index(config.Log.Filename, "}")
+	// import file
+	startIndex := strings.Index(config.Log.Import.Filename, "{")
+	endIndex := strings.Index(config.Log.Import.Filename, "}")
 	if startIndex != -1 && endIndex != -1 {
-		dateFormat := config.Log.Filename[startIndex+1 : endIndex]
-		config.Log.Filename = fmt.Sprintf(
+		dateFormat := config.Log.Import.Filename[startIndex+1 : endIndex]
+		config.Log.Import.Filename = fmt.Sprintf(
 			"%s%s%s",
-			config.Log.Filename[:startIndex],
+			config.Log.Import.Filename[:startIndex],
 			time.Now().UTC().Format(dateFormat),
-			config.Log.Filename[endIndex+1:],
+			config.Log.Import.Filename[endIndex+1:],
+		)
+	}
+	// export file
+	startIndex = strings.Index(config.Log.Export.Filename, "{")
+	endIndex = strings.Index(config.Log.Export.Filename, "}")
+	if startIndex != -1 && endIndex != -1 {
+		dateFormat := config.Log.Export.Filename[startIndex+1 : endIndex]
+		config.Log.Export.Filename = fmt.Sprintf(
+			"%s%s%s",
+			config.Log.Export.Filename[:startIndex],
+			time.Now().UTC().Format(dateFormat),
+			config.Log.Export.Filename[endIndex+1:],
 		)
 	}
 
