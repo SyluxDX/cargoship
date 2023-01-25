@@ -1,4 +1,4 @@
-package main
+package transport
 
 import (
 	"fmt"
@@ -13,14 +13,14 @@ import (
 	"github.com/jlaffaye/ftp"
 )
 
-func checkFolder(folderPath string) {
+func checkLocalFolder(folderPath string) {
 	_, err := os.Stat(folderPath)
 	if os.IsNotExist(err) {
 		_ = os.MkdirAll(folderPath, 0755)
 	}
 }
 
-func listDirectory(conn *ftp.ServerConn, source string, prefix string, extension string) ([]*ftp.Entry, error) {
+func listRemoteDirectory(conn *ftp.ServerConn, source string, prefix string, extension string) ([]*ftp.Entry, error) {
 	var outputList []*ftp.Entry
 
 	entries, err := conn.List(source)
@@ -35,7 +35,7 @@ func listDirectory(conn *ftp.ServerConn, source string, prefix string, extension
 	return outputList, nil
 }
 
-func dateFilterDirectory(entries []*ftp.Entry, lastTime time.Time, maxTime int, limit int) []*ftp.Entry {
+func dateFilterRemoteDirectory(entries []*ftp.Entry, lastTime time.Time, maxTime int, limit int) []*ftp.Entry {
 	var outputList []*ftp.Entry
 
 	filesLimit := time.Now().UTC().Add(time.Minute * time.Duration(limit*-1))
@@ -104,20 +104,20 @@ func downloadFiles(conn *ftp.ServerConn, source string, destination string, entr
 	}
 	return lastFileTime, nil
 }
-func extractFiles(serverName string, ftpConn *ftp.ServerConn, service configurations.ServiceConfig, times *[]configurations.FileTimes) {
+func DownloadFiles(serverName string, ftpConn *ftp.ServerConn, service configurations.ServiceConfig, times *[]configurations.FileTimes) {
 
 	log.Printf("Processing %s: %s\n", service.Mode, service.Name)
 	// check folder
-	checkFolder(service.Dst)
+	checkLocalFolder(service.Dst)
 	// get last file time
 	fileTime := configurations.GetTimes(*times, serverName, service.Mode, service.Name)
 	// list files in directory
-	entries, err := listDirectory(ftpConn, service.Src, service.Prefix, service.Extension)
+	entries, err := listRemoteDirectory(ftpConn, service.Src, service.Prefix, service.Extension)
 	if err != nil {
 		log.Panic(err)
 	}
 
-	entries = dateFilterDirectory(entries, fileTime, service.MaxTime, service.Window)
+	entries = dateFilterRemoteDirectory(entries, fileTime, service.MaxTime, service.Window)
 	// check if there are any files to download
 	if len(entries) == 0 {
 		return

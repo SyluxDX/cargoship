@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"cargoship/shipper/cmd/configurations"
+	"cargoship/shipper/cmd/transport"
 
 	"github.com/jlaffaye/ftp"
 )
@@ -48,7 +49,7 @@ func main() {
 		for _, service := range server.Services {
 			fmt.Println(service.Name)
 			if service.Mode == "import" {
-				extractFiles(server.Name, conn, service, &times)
+				transport.DownloadFiles(server.Name, conn, service, &times)
 			}
 		}
 	}
