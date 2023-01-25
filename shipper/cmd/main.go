@@ -6,7 +6,7 @@ import (
 	"log"
 	"time"
 
-	"cargoship/cmd/configurations"
+	"cargoship/shipper/cmd/configurations"
 
 	"github.com/jlaffaye/ftp"
 )
@@ -46,6 +46,7 @@ func main() {
 		}
 		// service loop
 		for _, service := range server.Services {
+			fmt.Println(service.Name)
 			if service.Mode == "import" {
 				extractFiles(server.Name, conn, service, &times)
 			}

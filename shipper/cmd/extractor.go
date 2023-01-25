@@ -8,7 +8,7 @@ import (
 	"strings"
 	"time"
 
-	"cargoship/cmd/configurations"
+	"cargoship/shipper/cmd/configurations"
 
 	"github.com/jlaffaye/ftp"
 )
