@@ -2,3 +2,4 @@
 !shipper/shipper_config.yaml
 ftpdata/
 pulldata/
+upload/

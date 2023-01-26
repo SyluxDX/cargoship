@@ -47,9 +47,11 @@ func main() {
 		}
 		// service loop
 		for _, service := range server.Services {
-			fmt.Println(service.Name)
 			if service.Mode == "import" {
 				transport.DownloadFiles(server.Name, conn, service, &times)
+			}
+			if service.Mode == "export" {
+				transport.UploadFiles(server.Name, conn, service, &times)
 			}
 		}
 	}

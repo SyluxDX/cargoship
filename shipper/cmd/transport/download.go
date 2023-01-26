@@ -59,7 +59,7 @@ func dateFilterRemoteDirectory(entries []*ftp.Entry, lastTime time.Time, maxTime
 	return outputList
 }
 
-func fileDownload(conn *ftp.ServerConn, destination string, entry *ftp.Entry) error {
+func download(conn *ftp.ServerConn, destination string, entry *ftp.Entry) error {
 	remoteReader, err := conn.Retr(entry.Name)
 	if err != nil {
 		return err
@@ -82,28 +82,10 @@ func fileDownload(conn *ftp.ServerConn, destination string, entry *ftp.Entry) er
 		log.Panic(err)
 	}
 	log.Printf("Donwloaded file %s (size %d), written %d\n", entry.Name, entry.Size, sizeWritten)
+
 	return nil
 }
 
-func downloadFiles(conn *ftp.ServerConn, source string, destination string, entries []*ftp.Entry) (time.Time, error) {
-	// move to source folder
-	var lastFileTime time.Time
-
-	err := conn.ChangeDir(source)
-	if err != nil {
-		return lastFileTime, err
-	}
-	// download files
-	for _, entry := range entries {
-		err := fileDownload(conn, fmt.Sprintf("%s/%s", destination, entry.Name), entry)
-		if err != nil {
-			return lastFileTime, err
-		}
-		// update
-		lastFileTime = entry.Time
-	}
-	return lastFileTime, nil
-}
 func DownloadFiles(serverName string, ftpConn *ftp.ServerConn, service configurations.ServiceConfig, times *[]configurations.FileTimes) {
 
 	log.Printf("Processing %s: %s\n", service.Mode, service.Name)
@@ -120,13 +102,26 @@ func DownloadFiles(serverName string, ftpConn *ftp.ServerConn, service configura
 	entries = dateFilterRemoteDirectory(entries, fileTime, service.MaxTime, service.Window)
 	// check if there are any files to download
 	if len(entries) == 0 {
+		log.Println("No files to download")
 		return
 	}
 	// donwload files
-	lastTime, err := downloadFiles(ftpConn, service.Src, service.Dst, entries)
+	lastFileTime := fileTime
+	err = ftpConn.ChangeDir(service.Src)
 	if err != nil {
-		log.Panic(err)
+		log.Printf("[ERROR] %s", err)
+	}
+	for _, entry := range entries {
+		err := download(ftpConn, fmt.Sprintf("%s/%s", service.Dst, entry.Name), entry)
+		if err != nil {
+			log.Printf("[ERROR] %s", err)
+			break
+		}
+		// update
+		lastFileTime = entry.Time
 	}
 	// update last downloaded time
-	configurations.UpsertTimes(times, serverName, service.Mode, service.Name, lastTime)
+	if lastFileTime != fileTime {
+		configurations.UpsertTimes(times, serverName, service.Mode, service.Name, lastFileTime)
+	}
 }
