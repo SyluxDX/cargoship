@@ -1,5 +1,9 @@
+# Ignore all configuations files
 *.yaml
+# Except the following placeholders
 !shipper/shipper_config.yaml
+
+# Shipper test dta folder
 ftpdata/
 pulldata/
 upload/
