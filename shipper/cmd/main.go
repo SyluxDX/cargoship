@@ -15,7 +15,7 @@ import (
 func main() {
 	// command line flags
 	var configFilepath string
-	flag.StringVar(&configFilepath, "config", "extractor_config.yaml", "Path to configuration yaml")
+	flag.StringVar(&configFilepath, "config", "shipper_config.yaml", "Path to configuration yaml")
 	flag.Parse()
 
 	// read script configuration

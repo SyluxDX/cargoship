@@ -73,15 +73,15 @@ type FtpConfig struct {
 	Protocol string
 	Services []ServiceConfig
 }
-type ExtractorConfig struct {
+type ShipperConfig struct {
 	Log2Console bool
 	TimesPath   string
 	Log         LogConfig
 	Ftps        []FtpConfig
 }
 
-func processConfig(config fileConfig) *ExtractorConfig {
-	var newConfig = &ExtractorConfig{
+func processConfig(config fileConfig) *ShipperConfig {
+	var newConfig = &ShipperConfig{
 		Log2Console: config.Log2Console,
 		TimesPath:   config.TimesPath,
 		Log: LogConfig{
@@ -132,7 +132,7 @@ func processConfig(config fileConfig) *ExtractorConfig {
 	return newConfig
 }
 
-func ReadConfig(filepath string) (*ExtractorConfig, error) {
+func ReadConfig(filepath string) (*ShipperConfig, error) {
 	// read file
 	fdata, err := os.ReadFile(filepath)
 	if err != nil {
