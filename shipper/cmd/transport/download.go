@@ -13,13 +13,6 @@ import (
 	"github.com/jlaffaye/ftp"
 )
 
-func checkLocalFolder(folderPath string) {
-	_, err := os.Stat(folderPath)
-	if os.IsNotExist(err) {
-		_ = os.MkdirAll(folderPath, 0755)
-	}
-}
-
 func listRemoteDirectory(conn *ftp.ServerConn, source string, prefix string, extension string) ([]*ftp.Entry, error) {
 	var outputList []*ftp.Entry
 
@@ -91,6 +84,11 @@ func DownloadFiles(serverName string, ftpConn *ftp.ServerConn, service configura
 	log.Printf("Processing %s: %s\n", service.Mode, service.Name)
 	// check folder
 	checkLocalFolder(service.Dst)
+	// check remote hostory folder
+	if service.History != "" {
+		checkRemoteFolder(ftpConn, service.History)
+	}
+
 	// get last file time
 	fileTime := configurations.GetTimes(*times, serverName, service.Mode, service.Name)
 	// list files in directory
@@ -109,13 +107,19 @@ func DownloadFiles(serverName string, ftpConn *ftp.ServerConn, service configura
 	lastFileTime := fileTime
 	err = ftpConn.ChangeDir(service.Src)
 	if err != nil {
-		log.Printf("[ERROR] %s", err)
+		log.Printf("[ERROR] %s\n", err)
 	}
 	for _, entry := range entries {
 		err := download(ftpConn, fmt.Sprintf("%s/%s", service.Dst, entry.Name), entry)
 		if err != nil {
-			log.Printf("[ERROR] %s", err)
+			log.Printf("[ERROR] %s\n", err)
 			break
+		}
+		if service.History != "" {
+			err := ftpConn.Rename(entry.Name, fmt.Sprintf("%s/%s", service.History, entry.Name))
+			if err != nil {
+				log.Printf("[ERROR] %s\n", err)
+			}
 		}
 		// update
 		lastFileTime = entry.Time

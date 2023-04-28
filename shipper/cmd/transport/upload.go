@@ -12,15 +12,6 @@ import (
 	"github.com/jlaffaye/ftp"
 )
 
-func checkRemoteFolder(conn *ftp.ServerConn, folderPath string) {
-	err := conn.ChangeDir(folderPath)
-	if err != nil {
-		// folder doesn't exists, create
-		log.Printf("Create remote folder %s\n", folderPath)
-		conn.MakeDir(folderPath)
-	}
-}
-
 func listLocalDirectory(source string, prefix string, extension string) ([]os.FileInfo, error) {
 	var outputList []os.FileInfo
 
