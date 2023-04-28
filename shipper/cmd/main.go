@@ -49,9 +49,10 @@ func main() {
 		for _, service := range server.Services {
 			if service.Mode == "import" {
 				transport.DownloadFiles(server.Name, conn, service, &times)
-			}
-			if service.Mode == "export" {
+			} else if service.Mode == "export" {
 				transport.UploadFiles(server.Name, conn, service, &times)
+			} else {
+				log.Printf("ERROR Unknown mode, %s, on service %s.\n", service.Mode, service.Name)
 			}
 		}
 	}
