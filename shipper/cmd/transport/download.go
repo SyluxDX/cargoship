@@ -120,6 +120,7 @@ func DownloadFiles(serverName string, ftpConn *ftp.ServerConn, service configura
 			if err != nil {
 				log.Printf("[ERROR] %s\n", err)
 			}
+			log.Printf("Moved file %s to history folder %s\n", entry.Name, service.History)
 		}
 		// update
 		lastFileTime = entry.Time
