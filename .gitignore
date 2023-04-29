@@ -3,7 +3,8 @@
 # Except the following placeholders
 !shipper/shipper_config.yaml
 
-# Shipper test dta folder
+# Shipper test data folder
 ftpdata/
 pulldata/
 upload/
+script_log/
