@@ -13,14 +13,8 @@ type fileConfig struct {
 	Log2Console bool   `yaml:"log2console"`
 	TimesPath   string `yaml:"timesFilePath"`
 	Log         struct {
-		Import struct {
-			Folder   string `yaml:"folder"`
-			Filename string `yaml:"filename"`
-		} `yaml:"import"`
-		Export struct {
-			Folder   string `yaml:"folder"`
-			Filename string `yaml:"filename"`
-		} `yaml:"export"`
+		Script string `yaml:"script"`
+		Files  string `yaml:"files"`
 	} `yaml:"logging"`
 	Ftps []struct {
 		Name     string `yaml:"name"`
@@ -49,8 +43,8 @@ type ModeLogConfig struct {
 	Filename string
 }
 type LogConfig struct {
-	Import ModeLogConfig
-	Export ModeLogConfig
+	Script string
+	Files  string
 }
 
 type ServiceConfig struct {
@@ -80,19 +74,30 @@ type ShipperConfig struct {
 	Ftps        []FtpConfig
 }
 
+func replaceDatePlaceholder(filename string) string {
+	start := strings.Index(filename, "{")
+	end := strings.Index(filename, "}")
+	if start != -1 && end != -1 {
+		dateFormat := filename[start+1 : end]
+		return fmt.Sprintf(
+			"%s%s%s",
+			filename[:start],
+			time.Now().UTC().Format(dateFormat),
+			filename[end+1:],
+		)
+	}
+	return filename
+}
+
 func processConfig(config fileConfig) *ShipperConfig {
 	var newConfig = &ShipperConfig{
 		Log2Console: config.Log2Console,
 		TimesPath:   config.TimesPath,
 		Log: LogConfig{
-			Import: ModeLogConfig{
-				Folder:   config.Log.Import.Folder,
-				Filename: config.Log.Import.Filename,
-			},
-			Export: ModeLogConfig{
-				Folder:   config.Log.Export.Folder,
-				Filename: config.Log.Export.Filename,
-			},
+			Script: replaceDatePlaceholder(config.Log.Script),
+			Files:  replaceDatePlaceholder(config.Log.Files),
+			// Script: config.Log.Script,
+			// Files:  config.Log.Files,
 		},
 	}
 
@@ -144,31 +149,6 @@ func ReadConfig(filepath string) (*ShipperConfig, error) {
 	err = yaml.Unmarshal(fdata, &config)
 	if err != nil {
 		return nil, err
-	}
-	// replace logfile name data placeholder
-	// import file
-	startIndex := strings.Index(config.Log.Import.Filename, "{")
-	endIndex := strings.Index(config.Log.Import.Filename, "}")
-	if startIndex != -1 && endIndex != -1 {
-		dateFormat := config.Log.Import.Filename[startIndex+1 : endIndex]
-		config.Log.Import.Filename = fmt.Sprintf(
-			"%s%s%s",
-			config.Log.Import.Filename[:startIndex],
-			time.Now().UTC().Format(dateFormat),
-			config.Log.Import.Filename[endIndex+1:],
-		)
-	}
-	// export file
-	startIndex = strings.Index(config.Log.Export.Filename, "{")
-	endIndex = strings.Index(config.Log.Export.Filename, "}")
-	if startIndex != -1 && endIndex != -1 {
-		dateFormat := config.Log.Export.Filename[startIndex+1 : endIndex]
-		config.Log.Export.Filename = fmt.Sprintf(
-			"%s%s%s",
-			config.Log.Export.Filename[:startIndex],
-			time.Now().UTC().Format(dateFormat),
-			config.Log.Export.Filename[endIndex+1:],
-		)
 	}
 
 	// process read config to match/duplicate service and server

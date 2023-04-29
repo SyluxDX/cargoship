@@ -1,17 +1,20 @@
 package transport
 
 import (
-	"log"
+	"fmt"
 	"os"
+
+	"cargoship/shipper/cmd/logging"
 
 	"github.com/jlaffaye/ftp"
 )
 
-func checkRemoteFolder(conn *ftp.ServerConn, folderPath string) {
+func checkRemoteFolder(conn *ftp.ServerConn, folderPath string, logger logging.Logger) {
 	err := conn.ChangeDir(folderPath)
+
 	if err != nil {
 		// folder doesn't exists, create
-		log.Printf("Create remote folder %s\n", folderPath)
+		logger.LogInfo(fmt.Sprintf("Create remote folder %s\n", folderPath))
 		conn.MakeDir(folderPath)
 	}
 }

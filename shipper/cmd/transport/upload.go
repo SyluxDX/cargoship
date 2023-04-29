@@ -2,12 +2,12 @@ package transport
 
 import (
 	"fmt"
-	"log"
 	"os"
 	"strings"
 	"time"
 
 	"cargoship/shipper/cmd/configurations"
+	"cargoship/shipper/cmd/logging"
 
 	"github.com/jlaffaye/ftp"
 )
@@ -57,7 +57,7 @@ func dateFilterLocalDirectory(entries []os.FileInfo, lastTime time.Time, maxTime
 	return outputList
 }
 
-func upload(conn *ftp.ServerConn, source string, entry os.FileInfo) error {
+func upload(conn *ftp.ServerConn, source string, entry os.FileInfo, logger logging.Logger) error {
 	// local reader
 	localReader, err := os.Open(source)
 	if err != nil {
@@ -71,16 +71,23 @@ func upload(conn *ftp.ServerConn, source string, entry os.FileInfo) error {
 		return err
 	}
 	remoteSize, _ := conn.FileSize(entry.Name())
-	log.Printf("Uploaded file %s (size %d), written %d\n", entry.Name(), entry.Size(), remoteSize)
+	logger.LogInfo(fmt.Sprintf("Uploaded file %s (size %d), written %d\n", entry.Name(), entry.Size(), remoteSize))
 
 	return nil
 }
 
-func UploadFiles(serverName string, ftpConn *ftp.ServerConn, service configurations.ServiceConfig, times *[]configurations.FileTimes) {
+func UploadFiles(
+	serverName string,
+	ftpConn *ftp.ServerConn,
+	service configurations.ServiceConfig,
+	times *[]configurations.FileTimes,
+	scriptLogger logging.Logger,
+	filesLogger logging.Logger,
+) {
 
-	log.Printf("Processing %s: %s\n", service.Mode, service.Name)
+	scriptLogger.LogInfo(fmt.Sprintf("Processing %s: %s\n", service.Mode, service.Name))
 	// check folders
-	checkRemoteFolder(ftpConn, service.Dst)
+	checkRemoteFolder(ftpConn, service.Dst, scriptLogger)
 	if service.History != "" {
 		checkLocalFolder(service.History)
 	}
@@ -90,25 +97,25 @@ func UploadFiles(serverName string, ftpConn *ftp.ServerConn, service configurati
 	// list files in directory
 	entries, err := listLocalDirectory(service.Src, service.Prefix, service.Extension)
 	if err != nil {
-		log.Panic(err)
+		scriptLogger.LogWarn(err.Error())
 	}
 
 	entries = dateFilterLocalDirectory(entries, fileTime, service.MaxTime, service.Window)
 	// check if there are any files to upload
 	if len(entries) == 0 {
-		log.Println("No files to upload")
+		scriptLogger.LogInfo("No files to upload")
 		return
 	}
 	// upload files
 	lastFileTime := fileTime
 	err = ftpConn.ChangeDir(service.Dst)
 	if err != nil {
-		log.Printf("[ERROR] %s", err)
+		scriptLogger.LogWarn(err.Error())
 	}
 	for _, entry := range entries {
-		err := upload(ftpConn, fmt.Sprintf("%s/%s", service.Src, entry.Name()), entry)
+		err := upload(ftpConn, fmt.Sprintf("%s/%s", service.Src, entry.Name()), entry, filesLogger)
 		if err != nil {
-			log.Printf("[ERROR2] %s", err)
+			scriptLogger.LogWarn(err.Error())
 			break
 		}
 		if service.History != "" {
@@ -116,7 +123,7 @@ func UploadFiles(serverName string, ftpConn *ftp.ServerConn, service configurati
 				fmt.Sprintf("%s/%s", service.Src, entry.Name()),
 				fmt.Sprintf("%s/%s", service.History, entry.Name()),
 			)
-			log.Printf("Moved file %s to history folder %s\n", entry.Name(), service.History)
+			scriptLogger.LogInfo(fmt.Sprintf("Moved file %s to history folder %s\n", entry.Name(), service.History))
 		}
 		// update
 		lastFileTime = entry.ModTime()
