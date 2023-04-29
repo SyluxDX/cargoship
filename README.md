@@ -43,7 +43,6 @@ _add more info_
     - Does golang have internal awk?
 
 ### ToDo
-- Create Sender Script
 - Test golang connections to SFTP server
     - Create sftp Extractor script
 - Add logging to file:
