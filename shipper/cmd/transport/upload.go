@@ -79,8 +79,11 @@ func upload(conn *ftp.ServerConn, source string, entry os.FileInfo) error {
 func UploadFiles(serverName string, ftpConn *ftp.ServerConn, service configurations.ServiceConfig, times *[]configurations.FileTimes) {
 
 	log.Printf("Processing %s: %s\n", service.Mode, service.Name)
-	// check folder
+	// check folders
 	checkRemoteFolder(ftpConn, service.Dst)
+	if service.History != "" {
+		checkLocalFolder(service.History)
+	}
 	// get last file time
 	fileTime := configurations.GetTimes(*times, serverName, service.Mode, service.Name)
 
@@ -107,6 +110,13 @@ func UploadFiles(serverName string, ftpConn *ftp.ServerConn, service configurati
 		if err != nil {
 			log.Printf("[ERROR2] %s", err)
 			break
+		}
+		if service.History != "" {
+			os.Rename(
+				fmt.Sprintf("%s/%s", service.Src, entry.Name()),
+				fmt.Sprintf("%s/%s", service.History, entry.Name()),
+			)
+			log.Printf("Moved file %s to history folder %s\n", entry.Name(), service.History)
 		}
 		// update
 		lastFileTime = entry.ModTime()
