@@ -45,9 +45,28 @@ _add more info_
 ### ToDo
 - Test golang connections to SFTP server
     - Create sftp Extractor script
-- Add logging to file:
-    - create files if config exists
-    - configure loggers: import, export, console
 - See how to use goroutines to speed up downloads
 - Update README with futher description of Time Windows
 - Create Makefile to build scripts to windows and linux
+- Think if want/need to change project structure
+
+### golang possible structure
+#### /cmd
+
+This folder contains the main application entry point files for the project, with the directory name matching the name for the binary. So for example `cmd/simple-service` meaning that the binary we publish will be `simple-service`.
+
+#### /internal
+
+This package holds the private library code used in your service, it is specific to the function of the service and not shared with other services. One thing to note is this privacy is enforced by the compiler itself, see the Go 1.4 release notes for more details.
+
+#### /pkg
+
+This folder contains code which is OK for other services to consume, this may include API clients, or utility functions which may be handy for other projects but don’t justify their own project. Personally I prefer to use this over `internal`, mainly as I like to keep things open for reuse in most of projects.
+
+```
+cmd/
+    server/
+        main.go
+    cli/
+        main.go
+```
