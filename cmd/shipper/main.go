@@ -6,9 +6,9 @@ import (
 	"log"
 	"time"
 
-	"cargoship/shipper/cmd/configurations"
-	"cargoship/shipper/cmd/logging"
-	"cargoship/shipper/cmd/transport"
+	"cargoship/cmd/shipper/transport"
+	"cargoship/internal/configurations"
+	"cargoship/internal/logging"
 
 	"github.com/jlaffaye/ftp"
 )
@@ -25,7 +25,7 @@ func main() {
 	flag.Parse()
 
 	// read script configuration
-	configs, err := configurations.ReadConfig(configFilepath)
+	configs, err := configurations.ShipperReadConfig(configFilepath)
 	if err != nil {
 		log.Panic(err)
 	}
@@ -36,14 +36,14 @@ func main() {
 	defer filesLogger.Close()
 
 	// read ftp times state
-	times, err := configurations.ReadTimes(configs.TimesPath)
+	times, err := configurations.ShipperReadTimes(configs.TimesPath)
 	if err != nil {
 		scriptLogger.LogError(err.Error())
 		panic(err)
 	}
 
 	// defer update/write ftp time state file
-	defer configurations.WriteTimes(&times, configs.TimesPath)
+	defer configurations.ShipperWriteTimes(&times, configs.TimesPath)
 
 	for _, server := range configs.Ftps {
 		scriptLogger.LogInfo(fmt.Sprintf("Connect to server: %s\n", server.Name))

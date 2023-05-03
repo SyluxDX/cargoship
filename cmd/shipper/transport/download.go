@@ -5,53 +5,13 @@ import (
 	"io"
 	"log"
 	"os"
-	"strings"
-	"time"
 
-	"cargoship/shipper/cmd/configurations"
-	"cargoship/shipper/cmd/logging"
+	"cargoship/internal/configurations"
+	"cargoship/internal/files"
+	"cargoship/internal/logging"
 
 	"github.com/jlaffaye/ftp"
 )
-
-func listRemoteDirectory(conn *ftp.ServerConn, source string, prefix string, extension string) ([]*ftp.Entry, error) {
-	var outputList []*ftp.Entry
-
-	entries, err := conn.List(source)
-	if err != nil {
-		return nil, err
-	}
-	for _, entry := range entries {
-		if strings.HasPrefix(entry.Name, prefix) && strings.HasSuffix(entry.Name, extension) {
-			outputList = append(outputList, entry)
-		}
-	}
-	return outputList, nil
-}
-
-func dateFilterRemoteDirectory(entries []*ftp.Entry, lastTime time.Time, maxTime int, limit int) []*ftp.Entry {
-	var outputList []*ftp.Entry
-
-	filesLimit := time.Now().UTC().Add(time.Minute * time.Duration(limit*-1))
-
-	for _, entry := range entries {
-		if entry.Time.After(lastTime) && entry.Time.Before(filesLimit) {
-			if len(outputList) == 0 {
-				// update file limit with max time
-				maxLimit := entry.Time.Add(time.Minute * time.Duration(maxTime))
-				if maxLimit.Before(filesLimit) {
-					filesLimit = maxLimit
-				}
-			}
-			outputList = append(outputList, entry)
-		}
-		// cut for loop if files (entry) are after the file limit time
-		if entry.Time.After(filesLimit) {
-			break
-		}
-	}
-	return outputList
-}
 
 func download(conn *ftp.ServerConn, destination string, entry *ftp.Entry, logger logging.Logger) error {
 	remoteReader, err := conn.Retr(entry.Name)
@@ -83,21 +43,21 @@ func download(conn *ftp.ServerConn, destination string, entry *ftp.Entry, logger
 func DownloadFiles(
 	serverName string,
 	ftpConn *ftp.ServerConn,
-	service configurations.ServiceConfig,
-	times *[]configurations.FileTimes,
+	service configurations.ShipperService,
+	times *[]configurations.ShipperFileTimes,
 	scriptLogger logging.Logger,
 	filesLogger logging.Logger,
 ) {
 
 	// check folder
-	checkLocalFolder(service.Dst)
+	files.CheckLocalFolder(service.Dst)
 	// check remote hostory folder
 	if service.History != "" {
 		checkRemoteFolder(ftpConn, service.History, scriptLogger)
 	}
 
 	// get last file time
-	fileTime := configurations.GetTimes(*times, serverName, service.Mode, service.Name)
+	fileTime := configurations.ShipperGetTimes(*times, serverName, service.Mode, service.Name)
 	// list files in directory
 	entries, err := listRemoteDirectory(ftpConn, service.Src, service.Prefix, service.Extension)
 	if err != nil {
@@ -134,6 +94,6 @@ func DownloadFiles(
 	}
 	// update last downloaded time
 	if lastFileTime != fileTime {
-		configurations.UpsertTimes(times, serverName, service.Mode, service.Name, lastFileTime)
+		configurations.ShipperUpsertTimes(times, serverName, service.Mode, service.Name, lastFileTime)
 	}
 }
