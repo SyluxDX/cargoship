@@ -9,9 +9,8 @@ import (
 
 // Logger stasd
 type Logger struct {
-	file        *os.File
-	logger      *log.Logger
-	numberlines int
+	file   *os.File
+	logger *log.Logger
 }
 
 func (l *Logger) Init(path string, toConsole bool) {
@@ -22,6 +21,7 @@ func (l *Logger) Init(path string, toConsole bool) {
 
 	// open file
 	l.file, err = os.OpenFile(path, os.O_CREATE|os.O_APPEND|os.O_RDWR, 0666)
+
 	if err != nil {
 		log.Panicln(err)
 	}
@@ -31,35 +31,33 @@ func (l *Logger) Init(path string, toConsole bool) {
 	} else {
 		l.logger = log.New(l.file, "", log.LstdFlags|log.LUTC)
 	}
-	l.numberlines = 0
 }
 
 func (l *Logger) LogDebug(message string) {
 	l.logger.Printf("DEBUG %s", message)
-	l.numberlines += 1
 }
 
 func (l *Logger) LogInfo(message string) {
 	l.logger.Printf("INFO %s", message)
-	l.numberlines += 1
 }
 
 func (l *Logger) LogWarn(message string) {
 	l.logger.Printf("WARN %s", message)
-	l.numberlines += 1
 }
 
 func (l *Logger) LogError(message string) {
 	l.logger.Printf("ERROR %s", message)
-	l.numberlines += 1
 }
 
 func (l *Logger) Close() {
+	// get file status
+	info, _ := l.file.Stat()
+
 	// close file
 	l.file.Close()
 
 	// delete file if no lines are written
-	if l.numberlines == 0 {
+	if info.Size() == 0 {
 		os.Remove(l.file.Name())
 	}
 }

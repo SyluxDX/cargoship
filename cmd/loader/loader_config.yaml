@@ -1,0 +1,35 @@
+log2console: true
+timesFilePath: "manifest.yaml"
+
+# Golang date formation
+#    year: 2006
+#   month: 01
+#     day: 02
+#   hours: 15
+# minutes: 04
+# seconds: 05
+logging:
+  script: "script_log/loaderLogs_{200601021504}.log"
+  files: "script_log/processedFiles_{200601021504}.log"
+
+# Loader modes:
+#  compress
+#  cleaner
+services:
+- name: "cleaner service"
+  mode: cleaner
+  sourceFolder: "./src"
+  destinationFolder: "./dst"
+  filePrefix: "file-"
+  fileExtension: "txt"
+  maxTime: 1
+  windowLimit: 1
+
+- name: "compress service"
+  mode: compress
+  sourceFolder: "./src"
+  destinationFolder: "./dst"
+  filePrefix: "file-"
+  fileExtension: "txt"
+  maxTime: 2
+  windowLimit: 1

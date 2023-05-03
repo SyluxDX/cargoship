@@ -1,10 +1,11 @@
 package files
 
 import (
-	"cargoship/loader/cmd/configurations"
-	"cargoship/loader/cmd/logging"
 	"fmt"
 	"os"
+
+	"cargoship/internal/configurations"
+	"cargoship/internal/logging"
 )
 
 func CleanFiles(
@@ -38,4 +39,5 @@ func CleanFiles(
 	if lastFileTime != fileTime {
 		times.UpsertTimes(service.Name, service.Mode, lastFileTime.UTC())
 	}
+	scriptLogger.LogInfo(fmt.Sprintf("Deleted %d file(s)", len(filterd)))
 }

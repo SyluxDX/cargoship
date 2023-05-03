@@ -45,7 +45,7 @@ func replaceDatePlaceholder(filename string) string {
 	return filename
 }
 
-func ReadConfig(filepath string) (*LoaderConfig, error) {
+func LoaderReadConfig(filepath string) (*LoaderConfig, error) {
 	// read file
 	fdata, err := os.ReadFile(filepath)
 	if err != nil {

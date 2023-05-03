@@ -1,4 +1,4 @@
-module cargoship/loader
+module cargoship
 
 go 1.19
 

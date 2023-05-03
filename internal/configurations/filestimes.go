@@ -23,7 +23,7 @@ type FileTimes struct {
 	Times []filetime
 }
 
-func ReadTimes(filepath string) (*FileTimes, error) {
+func LoaderReadTimes(filepath string) (*FileTimes, error) {
 	// create empty readConfig
 	var readConfig []configTimes
 
