@@ -37,7 +37,7 @@ File Creation Window:
 	do
 		list="$list $a"
 	done
-	printf '\n Selected folders:%s\n        Time Mode: %s\n  Number of files: %d\n' "$list" "$TIME" "$FILES"
+	printf '\n Prefix folder:%s\n Selected folders:%s\n        Time Mode: %s\n  Number of files: %d\n' "$PREFIX" "$list" "$TIME" "$FILES"
 	# check if any aditional message to write
 	if [ ! -z "$ERROR" ]
 	then
@@ -72,7 +72,8 @@ function write_files() {
 
 	for i in $(seq $start $increment $end)
 	do
-		stamp=$(date -ud "${i} ${step}" '+%Y%m%d%H%M')
+		# stamp=$(date -ud "${i} ${step}" '+%Y%m%d%H%M')
+		stamp=$(date -d "${i} ${step}" '+%Y%m%d%H%M')
 		echo "Writen ${prefix}${stamp}.${extension}"
 		# write file with data
 		head -c 10K /dev/urandom > "${prefix}${stamp}.${extension}"
@@ -101,17 +102,17 @@ function execute_actions() {
 	echo ""
 	for act in ${MODE[@]}; do
 		if [ $act = "1minute" ]; then
-			mkdir -p ftpdata/files_1min
-			write_files $start $end minutes "ftpdata/files_1min/min1_" log
+			mkdir -p $PREFIX/files_1min
+			write_files $start $end minutes "$PREFIX/files_1min/min1_" log
 		elif [ $act = "5minute" ]; then
-			mkdir -p ftpdata/files_5min
-			write_files $(( $start*5 )) $(( $end*5 )) minutes "ftpdata/files_5min/min5_" log 5
+			mkdir -p $PREFIX/files_5min
+			write_files $(( $start*5 )) $(( $end*5 )) minutes "$PREFIX/files_5min/min5_" log 5
 		elif [ $act = "hourly" ]; then
-			mkdir -p ftpdata/files_hour
-			write_files $start $end hours "ftpdata/files_hour/hourly_" log
+			mkdir -p $PREFIX/files_hour
+			write_files $start $end hours "$PREFIX/files_hour/hourly_" log
 		elif [ $act = "daily" ]; then
-			mkdir -p ftpdata/files_day
-			write_files $start $end days "ftpdata/files_day/daily_" log
+			mkdir -p $PREFIX/files_day
+			write_files $start $end days "$PREFIX/files_day/daily_" log
 		else
 			ERROR="${RED}ERROR${NC}: Unknow mode"
 		fi
@@ -126,6 +127,10 @@ MODE=("1minute")
 TIME="past"
 FILES=5
 ERROR=""
+PREFIX="${1:-ftpdata}"
+
+# create perfix folder
+mkdir -p $PREFIX
 
 # save terminal state
 tput smcup
