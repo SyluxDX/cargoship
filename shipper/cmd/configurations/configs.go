@@ -96,8 +96,6 @@ func processConfig(config fileConfig) *ShipperConfig {
 		Log: LogConfig{
 			Script: replaceDatePlaceholder(config.Log.Script),
 			Files:  replaceDatePlaceholder(config.Log.Files),
-			// Script: config.Log.Script,
-			// Files:  config.Log.Files,
 		},
 	}
 
