@@ -1,5 +1,5 @@
 log2console: true
-timesFilePath: "ftptimes.yaml"
+timesFilePath: "manifest.yaml"
 
 # Golang date formation
 #    year: 2006
