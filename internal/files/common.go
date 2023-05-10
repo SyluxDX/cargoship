@@ -6,7 +6,14 @@ import (
 	"time"
 )
 
-func listLocalDirectory(source string, prefix string, extension string) ([]os.FileInfo, error) {
+func CheckLocalFolder(folderPath string) {
+	_, err := os.Stat(folderPath)
+	if os.IsNotExist(err) {
+		_ = os.MkdirAll(folderPath, 0755)
+	}
+}
+
+func ListLocalDirectory(source string, prefix string, extension string) ([]os.FileInfo, error) {
 	var outputList []os.FileInfo
 
 	entries, err := os.ReadDir(source)
@@ -27,7 +34,7 @@ func listLocalDirectory(source string, prefix string, extension string) ([]os.Fi
 	return outputList, nil
 }
 
-func dateFilterLocalDirectory(entries []os.FileInfo, lastTime time.Time, maxTime int, limit int) []os.FileInfo {
+func DateFilterLocalDirectory(entries []os.FileInfo, lastTime time.Time, maxTime int, limit int) []os.FileInfo {
 	var outputList []os.FileInfo
 
 	filesLimit := time.Now().UTC().Add(time.Minute * time.Duration(limit*-1))

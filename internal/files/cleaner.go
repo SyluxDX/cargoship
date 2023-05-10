@@ -1,20 +1,21 @@
 package files
 
 import (
-	"cargoship/loader/cmd/configurations"
-	"cargoship/loader/cmd/logging"
 	"fmt"
 	"os"
+
+	"cargoship/internal/configurations"
+	"cargoship/internal/logging"
 )
 
 func CleanFiles(
-	service configurations.ServiceConfig,
+	service configurations.LoaderService,
 	times *configurations.FileTimes,
 	scriptLogger logging.Logger,
 	filesLogger logging.Logger,
 ) {
 	scriptLogger.LogInfo(fmt.Sprintf("Processing %s: %s\n", service.Mode, service.Name))
-	files, err := listLocalDirectory(service.Src, service.Prefix, service.Extension)
+	files, err := ListLocalDirectory(service.Src, service.Prefix, service.Extension)
 	if err != nil {
 		scriptLogger.LogWarn(err.Error())
 	}
@@ -22,7 +23,7 @@ func CleanFiles(
 	// get last file time
 	fileTime := times.GetTimes(service.Name, service.Mode)
 	// filter local files
-	filterd := dateFilterLocalDirectory(files, fileTime, service.MaxTime, service.Window)
+	filterd := DateFilterLocalDirectory(files, fileTime, service.MaxTime, service.Window)
 
 	lastFileTime := fileTime
 	for _, file := range filterd {
@@ -38,4 +39,5 @@ func CleanFiles(
 	if lastFileTime != fileTime {
 		times.UpsertTimes(service.Name, service.Mode, lastFileTime.UTC())
 	}
+	scriptLogger.LogInfo(fmt.Sprintf("Deleted %d file(s)", len(filterd)))
 }

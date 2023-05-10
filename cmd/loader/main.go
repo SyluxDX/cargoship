@@ -5,15 +5,10 @@ import (
 	"fmt"
 	"log"
 
-	"cargoship/loader/cmd/configurations"
-	"cargoship/loader/cmd/files"
-	"cargoship/loader/cmd/logging"
+	"cargoship/internal/configurations"
+	"cargoship/internal/files"
+	"cargoship/internal/logging"
 )
-
-// func debug_yaml(data interface{}) {
-// 	out, _ := yaml.Marshal(data)
-// 	fmt.Println(string(out))
-// }
 
 var (
 	scriptLogger logging.Logger
@@ -27,7 +22,7 @@ func main() {
 	flag.Parse()
 
 	// read script configuration
-	configs, err := configurations.ReadConfig(configFilepath)
+	configs, err := configurations.LoaderReadConfig(configFilepath)
 	if err != nil {
 		log.Panic(err)
 	}
@@ -39,7 +34,7 @@ func main() {
 	defer filesLogger.Close()
 
 	// read ftp times state
-	times, err := configurations.ReadTimes(configs.TimesPath)
+	times, err := configurations.LoaderReadTimes(configs.TimesPath)
 	if err != nil {
 		scriptLogger.LogError(err.Error())
 		panic(err)

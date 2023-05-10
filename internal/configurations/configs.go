@@ -9,7 +9,8 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-type fileConfig struct {
+// Shipper structures
+type shipperConfig struct {
 	Log2Console bool   `yaml:"log2console"`
 	TimesPath   string `yaml:"timesFilePath"`
 	Log         struct {
@@ -37,17 +38,7 @@ type fileConfig struct {
 		Window    int      `yaml:"windowLimit"`
 	} `yaml:"services"`
 }
-
-type ModeLogConfig struct {
-	Folder   string
-	Filename string
-}
-type LogConfig struct {
-	Script string
-	Files  string
-}
-
-type ServiceConfig struct {
+type ShipperService struct {
 	Name      string
 	Mode      string
 	Src       string
@@ -65,13 +56,38 @@ type FtpConfig struct {
 	User     string
 	Pass     string
 	Protocol string
-	Services []ServiceConfig
+	Services []ShipperService
 }
 type ShipperConfig struct {
 	Log2Console bool
 	TimesPath   string
-	Log         LogConfig
-	Ftps        []FtpConfig
+	Log         struct {
+		Script string `yaml:"script"`
+		Files  string `yaml:"files"`
+	} `yaml:"logging"`
+	Ftps []FtpConfig
+}
+
+// Loader structures
+type LoaderService struct {
+	Name      string `yaml:"name"`
+	Mode      string `yaml:"mode"`
+	Src       string `yaml:"sourceFolder"`
+	Dst       string `yaml:"destinationFolder"`
+	Prefix    string `yaml:"filePrefix"`
+	Extension string `yaml:"fileExtension"`
+	MaxTime   int    `yaml:"maxTime"`
+	Window    int    `yaml:"windowLimit"`
+}
+
+type LoaderConfig struct {
+	Log2Console bool   `yaml:"log2console"`
+	TimesPath   string `yaml:"timesFilePath"`
+	Log         struct {
+		Script string `yaml:"script"`
+		Files  string `yaml:"files"`
+	} `yaml:"logging"`
+	Services []LoaderService `yaml:"services"`
 }
 
 func replaceDatePlaceholder(filename string) string {
@@ -89,11 +105,48 @@ func replaceDatePlaceholder(filename string) string {
 	return filename
 }
 
-func processConfig(config fileConfig) *ShipperConfig {
+func LoaderReadConfig(filepath string) (*LoaderConfig, error) {
+	// read file
+	fdata, err := os.ReadFile(filepath)
+	if err != nil {
+		return nil, err
+	}
+
+	var loader LoaderConfig
+	// unmarshall it
+	err = yaml.Unmarshal(fdata, &loader)
+	if err != nil {
+		return nil, err
+	}
+
+	loader.Log.Script = replaceDatePlaceholder(loader.Log.Script)
+	loader.Log.Files = replaceDatePlaceholder(loader.Log.Files)
+
+	return &loader, nil
+}
+
+func ShipperReadConfig(filepath string) (*ShipperConfig, error) {
+	// read file
+	fdata, err := os.ReadFile(filepath)
+	if err != nil {
+		return nil, err
+	}
+
+	var config shipperConfig
+	// unmarshall it
+	err = yaml.Unmarshal(fdata, &config)
+	if err != nil {
+		return nil, err
+	}
+
+	// process read config to match/duplicate service and server
 	var newConfig = &ShipperConfig{
 		Log2Console: config.Log2Console,
 		TimesPath:   config.TimesPath,
-		Log: LogConfig{
+		Log: struct {
+			Script string `yaml:"script"`
+			Files  string `yaml:"files"`
+		}{
 			Script: replaceDatePlaceholder(config.Log.Script),
 			Files:  replaceDatePlaceholder(config.Log.Files),
 		},
@@ -115,7 +168,7 @@ func processConfig(config fileConfig) *ShipperConfig {
 
 	// process serving matching to servers
 	for _, service := range config.Services {
-		match := ServiceConfig{
+		match := ShipperService{
 			Name:      service.Name,
 			Mode:      service.Mode,
 			Src:       service.Src,
@@ -132,23 +185,5 @@ func processConfig(config fileConfig) *ShipperConfig {
 			}
 		}
 	}
-	return newConfig
-}
-
-func ReadConfig(filepath string) (*ShipperConfig, error) {
-	// read file
-	fdata, err := os.ReadFile(filepath)
-	if err != nil {
-		return nil, err
-	}
-
-	var config fileConfig
-	// unmarshall it
-	err = yaml.Unmarshal(fdata, &config)
-	if err != nil {
-		return nil, err
-	}
-
-	// process read config to match/duplicate service and server
-	return processConfig(config), nil
+	return newConfig, nil
 }

@@ -1,0 +1,46 @@
+log2console: true
+timesFilePath: "local_devel/shipper_manifest.yaml"
+
+# Golang date formation
+#    year: 2006
+#   month: 01
+#     day: 02
+#   hours: 15
+# minutes: 04
+# seconds: 05
+logging:
+  script: "local_devel/script_log/shipper-logs_{200601021504}.log"
+  files: "local_devel/script_log/shipper-processedFiles_{200601021504}.log"
+
+ftps:
+- name: "debian"
+  hostname: "127.0.0.1"
+  port: 21
+  username: "ftpuser"
+  password: "passwd"
+  protocol: "ftp"
+
+services:
+- name: "rapid files"
+  ftpConfig: [debian]
+  mode: import
+  sourceFolder: "/files_1min"
+  destinationFolder: "local_devel/pulldata/files_1min"
+  filePrefix: "min1_"
+  fileExtension: "log"
+  historyFolder: ""
+  # historyFolder: "/files_1min/send"
+  maxTime: 5
+  windowLimit: 1
+
+- name: "test sender"
+  ftpConfig: [debian]
+  mode: export
+  sourceFolder: "local_devel/upload/files_1min"
+  destinationFolder: "/upload_files"
+  filePrefix: "upload_"
+  fileExtension: "log"
+  historyFolder: ""
+  # historyFolder: "local_devel/upload/files_1min/logs_send"
+  maxTime: 2
+  windowLimit: 1
