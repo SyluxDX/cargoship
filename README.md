@@ -1,6 +1,34 @@
 # Cargoship [In Contruction]
 Scripts to extract, compress, sends and cleanup files.
 
+# Scripts/Modules
+## Shipper
+Send and Retries files from a ftp and sftp server.
+
+Configurable for each server:
+- folders
+- files prefix and extensions
+- time window to retrieve/send
+
+For more details check [module documentation](cmd/shipper/README.md)
+
+## Loader
+Clean and compress local files for sending
+
+Configurable "services":
+- folders
+- files prefix and extensions
+- time window to retrieve/send
+
+For more details check [module documentation](cmd/loader/README.md)
+
+## Packager/Processor (ToDo?)
+Should be in here?
+
+Use external awk?
+
+Does golang have internal awk?
+
 ## Dynamic Timestamp
 
 ### Golang Timestamp Format
@@ -30,17 +58,6 @@ _template_
 Time limit calculated by substratcing minutes equal to windowLimit value to current date
 
 _add more info_
-
-### Planning
-- Shipper:
-    - Write sender, ftp and sftp
-- Loader:
-    - Compressor
-    - Cleaner
-- Packager/Processor:
-    - Should be in here?
-    - Use external awk?
-    - Does golang have internal awk?
 
 ### ToDo
 - Test golang connections to SFTP server
